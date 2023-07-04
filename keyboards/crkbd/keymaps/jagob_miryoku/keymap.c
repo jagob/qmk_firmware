@@ -145,60 +145,101 @@ const key_override_t **key_overrides = (const key_override_t *[]){
 /*     } */
 /* } */
 
-bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case GUI_A:
-        case ALT_R:
-        case LSFT_S:
-        case LCTL_Ti:
+/* bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) { */
+/*     switch (keycode) { */
+/*         case GUI_A: */
+/*         case ALT_R: */
+/*         case LSFT_S: */
+/*         case LCTL_Ti: */
+/*  */
+/*         case LCTL_N: */
+/*         case LSFT_E: */
+/*         case ALT_I: */
+/*         case GUI_O: */
+/*  */
+/*         case GUI_0: */
+/*         case ALT_EQL: */
+/*         case ALT_END: */
+/*             // Immediately select the hold action when another key is tapped. */
+/*             return true; */
+/*         default: */
+/*             // Do not select the hold action when another key is tapped. */
+/*             return false; */
+/*     } */
+/* } */
 
-        case LCTL_N:
-        case LSFT_E:
-        case ALT_I:
-        case GUI_O:
+/* bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) { */
+/*     switch (keycode) { */
+/*         case LT(_NUM, KC_BSPC): */
+/*         case LT(_SYM, KC_TAB): */
+/*         case LT(_CFG, KC_BSPC): */
+/*         case LALT_T(KC_ESC): */
+/*         case LCTL_T(KC_SPC): */
+/*         case LSFT_T(KC_ENT): */
+/*         case LGUI_T(KC_ESC): */
+/*             // Immediately select the hold action when another key is pressed. */
+/*             return true; */
+/*         default: */
+/*             // Do not select the hold action when another key is pressed. */
+/*             return false; */
+/*     } */
+/* } */
 
-        case GUI_0:
-        case ALT_EQL:
-        case ALT_END:
-            // Immediately select the hold action when another key is tapped.
-            return true;
-        default:
-            // Do not select the hold action when another key is tapped.
-            return false;
-    }
-}
-
-bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case LT(_NUM, KC_BSPC):
-        case LT(_SYM, KC_TAB):
-        case LT(_CFG, KC_BSPC):
-        case LALT_T(KC_ESC):
-        case LCTL_T(KC_SPC):
-        case LSFT_T(KC_ENT):
-        case LGUI_T(KC_ESC):
-            // Immediately select the hold action when another key is pressed.
-            return true;
-        default:
-            // Do not select the hold action when another key is pressed.
-            return false;
-    }
-}
-
-bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case LT(_NUM, KC_BSPC):
-            return false;
-        default:
-            return true;
-    }
-}
+/* bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) { */
+/*   // If you quickly hold a tap-hold key after tapping it, the tap action is */
+/*   // repeated. Key repeating is useful e.g. for Vim navigation keys, but can */
+/*   // lead to missed triggers in fast typing. Here, returning true means we */
+/*   // instead want to "force hold" and disable key repeating. */
+/*     switch (keycode) { */
+/*         case LT(_NUM, KC_BSPC): */
+/*             return false; */
+/*         default: */
+/*             return true; */
+/*     } */
+/* } */
 
 bool process_record_user(uint16_t keycode, keyrecord_t* record) {
   if (!process_achordion(keycode, record)) { return false; }
   // Your macros ...
 
   return true;
+}
+
+bool achordion_chord(uint16_t tap_hold_keycode, keyrecord_t* tap_hold_record,
+                     uint16_t other_keycode, keyrecord_t* other_record) {
+  // Exceptionally consider the following chords as holds, even though they
+  // are on the same hand in Dvorak.
+  // switch (tap_hold_keycode) {
+  //   case HOME_S:  // S + H and S + G.
+  //     if (other_keycode == HOME_H || other_keycode == KC_G) {
+  //       return true;
+  //     }
+  //     break;
+  // }
+
+  switch (tap_hold_keycode) {
+      case LT(_NUM, KC_BSPC):
+      case LCTL_T(KC_SPC):
+
+      case LSFT_T(KC_ENT):
+      case LT(_SYM, KC_TAB):
+      case LALT_T(KC_ESC):
+        return true;
+    break;
+  }
+
+  // Also allow same-hand holds when the other key is in the rows below the
+  // alphas. I need the `% (MATRIX_ROWS / 2)` because my keyboard is split.
+  // if (other_record->event.key.row % (MATRIX_ROWS / 2) >= 4) {
+  //   return true;
+  // }
+
+  if (other_record->event.key.row == 3 || other_record->event.key.row == 7) {
+    return true;
+  }
+
+  // Otherwise, follow the opposite hands rule.
+  return achordion_opposite_hands(tap_hold_record, other_record);
 }
 
 void matrix_scan_user(void) {

@@ -35,15 +35,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Prevent normal rollover on alphas from accidentally triggering mods.
 #define IGNORE_MOD_TAP_INTERRUPT 
 
-// Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
-// #define TAPPING_FORCE_HOLD
-// #define TAPPING_FORCE_HOLD_PER_KEY
-
 #define PERMISSIVE_HOLD 
 // #define PERMISSIVE_HOLD_PER_KEY
-// #define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
 
-#define BILATERAL_COMBINATIONS 1000
+// Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
+// #define TAPPING_FORCE_HOLD
+#define TAPPING_FORCE_HOLD_PER_KEY
+
+#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
+
+// #define BILATERAL_COMBINATIONS 1000
 
 // #define RETRO_TAPPING
 // #define RETRO_SHIFT
